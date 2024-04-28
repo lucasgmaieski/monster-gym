@@ -32,6 +32,8 @@ export const fontSizes = {
 }
 
 export const sizes = {
+  6: 24,
+  10: 40,
   14: 56,
   33: 148
 }

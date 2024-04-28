@@ -2,13 +2,20 @@ import { ImageBackground, ScrollView, Text, View } from "react-native";
 import LogoSvg from '@assets/logo.svg';
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
+import { useNavigation } from "@react-navigation/native";
+import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
 
 export function SignUp() {
+    const navigation = useNavigation();
+
+    function handleGoBack() {
+        navigation.goBack();
+    }
     return (
         <ScrollView className="w-full" showsVerticalScrollIndicator={false}>
-            <View className="flex-1 w-full bg-gray-700 pb-16">
-                <ImageBackground source={require('../assets/background.png')} resizeMode="cover" className="flex-1 px-10" alt="Pessoas treinando">
-                    <View className="items-center my-24">
+            <View className="flex-1 w-full pb-16">
+                <ImageBackground defaultSource={require('../assets/background.png')} source={require('../assets/background.png')} resizeMode="cover" className="flex-1 px-10" alt="Pessoas treinando">
+                    <View className="items-center my-20">
                         <LogoSvg width={170} />
                         <Text className="text-gray-100 text-sm">
                             Treine sua mente e o seu corpo
@@ -31,8 +38,12 @@ export function SignUp() {
                         <Button title="Criar e acessar"/>
                     </View>
 
-                    <View className="mt-20">
-                        <Button title="Voltar para o login" variant="outline"/>
+                    <View className="mt-16">
+                        <Button 
+                            title="Voltar para o login" 
+                            variant="outline"
+                            onPress={handleGoBack}
+                        />
                     </View>
                 </ImageBackground>
             </View>
