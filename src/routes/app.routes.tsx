@@ -16,7 +16,7 @@ type AppRoutes = {
     exercise: undefined;
 }
 
-export type AppNavitatorRoutesProps = BottomTabNavigationProp<AppRoutes>;
+export type AppNavigatorRoutesProps = BottomTabNavigationProp<AppRoutes>;
 
 const { Navigator, Screen } = createBottomTabNavigator<AppRoutes>();
 

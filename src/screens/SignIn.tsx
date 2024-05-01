@@ -4,12 +4,34 @@ import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useNavigation } from "@react-navigation/native";
 import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
+import { useForm, Controller } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+
+type FormDataProps = {
+    email: string;
+    password: string;
+}
+
+const signUpSchema = yup.object({
+    email: yup.string().required('Informe o e-mail.').email('E-mail inválido.'),
+    password: yup.string().required('Informe a senha.').min(6, 'A senha deve ter pelo menos 6 dígitos.'),
+})
 
 export function SignIn() {
+    const { control, handleSubmit, formState: { errors} } = useForm<FormDataProps>({
+        mode: "onBlur",
+        resolver: yupResolver(signUpSchema)
+    });
+
     const navigation = useNavigation<AuthNavigatorRoutesProps>();
 
     function handleNewAccount() {
         navigation.navigate('signUp')
+    }
+
+    function handleSignIn(data: FormDataProps) {
+        console.log(data)
     }
     return (
         <ScrollView className="w-full" showsVerticalScrollIndicator={false}>
@@ -23,16 +45,39 @@ export function SignIn() {
                     </View>
                     <View className="mb-5">
                         <Text className="text-gray-100 text-xl text-center font-heading mb-4">Acesse sua conta</Text>
-                        <Input
-                            placeholder="Email"
-                            keyboardType="email-address"
-                            autoCapitalize="none"
+                        <Controller 
+                            control={control}
+                            name="email"
+                            render={({ field: {onChange, value}}) => (
+                                <Input
+                                    placeholder="Email"
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    onChangeText={onChange}
+                                    value={value}
+                                    errorMessage={errors.email?.message}
+                                />
+                            )}
                         />
-                        <Input
-                            placeholder="Senha"
-                            secureTextEntry
+                        <Controller 
+                            control={control}
+                            name="password"
+                            render={({ field: {onChange, value}}) => (
+                                <Input
+                                    placeholder="Senha"
+                                    secureTextEntry
+                                    onChangeText={onChange}
+                                    value={value}
+                                    errorMessage={errors.password?.message}
+                                    onSubmitEditing={handleSubmit(handleSignIn)}
+                                    returnKeyType="send"
+                                />
+                            )}
                         />
-                        <Button title="Acessar"/>
+                        <Button 
+                            title="Acessar"
+                            onPress={handleSubmit(handleSignIn)}
+                        />
                     </View>
                     <View className="items-center mt-20">
                         <Text className="text-gray-100 text-md mb-3">
