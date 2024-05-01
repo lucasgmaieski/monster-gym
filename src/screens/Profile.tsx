@@ -3,13 +3,43 @@ import { Input } from "@components/Input";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { UserPhoto } from "@components/UserPhoto";
 import { useState } from "react";
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 
 export function Profile() {
     const [photoIsLoading, sePhotoIsLoading] = useState(false);
+    const [userPhoto, setUserPhoto] = useState('https://github.com/lucasgmaieski.png');
+    async function handleUserPhotoSelect() {
+        sePhotoIsLoading(true);
+        try {
+            const photoSelected = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                quality: 1,
+                aspect: [4, 4],
+                allowsEditing: true,
+                
+            });
+            console.log(photoSelected)
+    
+            if(photoSelected.canceled) return;
+    
+            if(photoSelected.assets[0].uri) {
+                const photoInfo = await FileSystem.getInfoAsync(photoSelected.assets[0].uri, {size: true})
 
+                if(photoInfo.exists && (photoInfo.size / 1024 / 1024 ) > 2) {
+                    return Alert.alert("Essa imagem é muito grande. Escolha uma de até 5MB.");
+                }
+                setUserPhoto(photoSelected.assets[0].uri)
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            sePhotoIsLoading(false);
+        }
+    }
     return(
-        <View className="flex-1 w-full">
+        <View className="flex-1 w-full ">
             <ScreenHeader title="Perfil"/>
             <ScrollView>
                 <View className="mt-6 px-10 items-center">
@@ -18,12 +48,12 @@ export function Profile() {
                         <View role="status" className="w-[110px] aspect-square animate-pulse bg-gray-400 rounded-full"></View>
                         :
                         <UserPhoto
-                            source={{ uri: 'https://github.com/lucasgmaieski.png'}}
+                            source={{ uri: userPhoto}}
                             alt="Foto do usuário"
                             size={110}
                         />
                     }
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={handleUserPhotoSelect}>
                         <Text className="text-green-500 text-md font-bold mt-2 mb-8">
                             Alterar foto
                         </Text>
