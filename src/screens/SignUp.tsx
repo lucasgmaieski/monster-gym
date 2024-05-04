@@ -1,4 +1,4 @@
-import { ImageBackground, ScrollView, Text, View } from "react-native";
+import { Alert, ImageBackground, ScrollView, Text, View } from "react-native";
 import LogoSvg from '@assets/logo.svg';
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
@@ -7,6 +7,9 @@ import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import axios from "axios";
+import { api } from '@services/api';
+import { AppError } from "@utils/AppError";
 
 type FormDataProps = {
     name: string;
@@ -33,8 +36,16 @@ export function SignUp() {
         navigation.goBack();
     }
 
-    function handleSignUp(data: FormDataProps) {
-        console.log(data)
+    async function handleSignUp({name, email, password}: FormDataProps) {
+        try {
+            const respose = await api.post('/users', {name, email, password});
+            console.log(respose.data);
+        } catch (error) {
+            const isAppError = error instanceof AppError;
+            const title = isAppError ? error.message : 'Não foi possível criar a conta. Tente novamente mais tarde.';
+            Alert.alert(title);
+        }
+
     }
     return (
         <ScrollView className="w-full" showsVerticalScrollIndicator={false}>
