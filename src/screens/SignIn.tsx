@@ -1,4 +1,4 @@
-import { ImageBackground, ScrollView, Text, View } from "react-native";
+import { Alert, ImageBackground, ScrollView, Text, View } from "react-native";
 import LogoSvg from '@assets/logo.svg';
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
@@ -7,6 +7,9 @@ import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useAuth } from "@hooks/useAuth";
+import { AppError } from "@utils/AppError";
+import { useState } from "react";
 
 type FormDataProps = {
     email: string;
@@ -19,10 +22,13 @@ const signUpSchema = yup.object({
 })
 
 export function SignIn() {
+    const [isLoading, setIsLoading] = useState(false);
     const { control, handleSubmit, formState: { errors} } = useForm<FormDataProps>({
         mode: "onBlur",
         resolver: yupResolver(signUpSchema)
     });
+
+    const { signIn } = useAuth();
 
     const navigation = useNavigation<AuthNavigatorRoutesProps>();
 
@@ -30,8 +36,17 @@ export function SignIn() {
         navigation.navigate('signUp')
     }
 
-    function handleSignIn(data: FormDataProps) {
-        console.log(data)
+    async function handleSignIn({email, password}: FormDataProps) {
+        try {
+            setIsLoading(true);
+            await signIn(email, password);
+        } catch (error) {
+            const isAppError = error instanceof AppError;
+            const title = isAppError ? error.message : 'Não foi possível entrar. Tente novamente mais tarde.'
+            Alert.alert(title);
+
+            setIsLoading(false);
+        }
     }
     return (
         <ScrollView className="w-full" showsVerticalScrollIndicator={false}>
@@ -77,6 +92,8 @@ export function SignIn() {
                         <Button 
                             title="Acessar"
                             onPress={handleSubmit(handleSignIn)}
+                            isLoading={isLoading}
+                            disabled={isLoading}
                         />
                     </View>
                     <View className="items-center mt-20">
