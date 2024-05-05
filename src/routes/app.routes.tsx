@@ -11,9 +11,9 @@ import { colors, sizes } from "@styles/theme";
 
 type AppRoutes = {
     home: undefined;
+    exercise: { exerciseId: string};
     history: undefined;
     profile: undefined;
-    exercise: undefined;
 }
 
 export type AppNavigatorRoutesProps = BottomTabNavigationProp<AppRoutes>;

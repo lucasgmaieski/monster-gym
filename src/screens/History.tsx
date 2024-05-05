@@ -1,19 +1,34 @@
 import { HistoryCard } from "@components/HistoryCard";
 import { ScreenHeader } from "@components/ScreenHeader";
-import { useState } from "react";
-import { SectionList, Text, View } from "react-native";
+import { HistoryByDayDTO } from "@dtos/HistoryByDayDTO";
+import { useFocusEffect } from "@react-navigation/native";
+import { api } from "@services/api";
+import { AppError } from "@utils/AppError";
+import { useCallback, useState } from "react";
+import { Alert, SectionList, Text, View } from "react-native";
 
 export function History() {
-    const [exercises, setExercises] = useState([
-        {
-            title: '26.08.24',
-            data: ['Puxada frontal', 'Remada unilateral'],
-        },
-        {
-            title: '27.08.24',
-            data: ['Puxada frontal'],
-        },
-    ]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [exercises, setExercises] = useState<HistoryByDayDTO[]>([]);
+
+    async function fetchExerciseDetails() {
+        try {
+            setIsLoading(true);
+            const response = await api.get('/history');
+            setExercises(response.data);
+        } catch (error) {
+            const isAppError = error instanceof AppError;
+            const title = isAppError ? error.message : 'Não foi possível carregar o histórico.';
+            Alert.alert(title);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    useFocusEffect(useCallback(() => {
+        fetchExerciseDetails();
+    }, []));
+
 
     return(
         <View className="flex-1 w-full">
@@ -21,9 +36,9 @@ export function History() {
 
             <SectionList 
                 sections={exercises}
-                keyExtractor={item => item}
+                keyExtractor={item => item.id}
                 renderItem={({ item }) => (
-                    <HistoryCard />
+                    <HistoryCard data={item}/>
                 )}
                 renderSectionHeader={({ section }) => (
                     <Text className="text-gray-200 text-md font-heading mt-10 mb-3">{section.title}</Text>

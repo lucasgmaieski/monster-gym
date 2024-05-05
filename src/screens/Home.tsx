@@ -1,21 +1,60 @@
 import { ExerciseCard } from "@components/ExerciseCard";
 import { Group } from "@components/Group";
 import { HomeHeader } from "@components/HomeHeader";
-import { useNavigation } from "@react-navigation/native";
+import { Loading } from "@components/Loading";
+import { ExerciseDTO } from "@dtos/ExerciseDTO";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "@routes/app.routes";
-import { useState } from "react";
-import { FlatList, Text, View } from "react-native";
+import { api } from "@services/api";
+import { AppError } from "@utils/AppError";
+import { useCallback, useEffect, useState } from "react";
+import { Alert, FlatList, Text, View } from "react-native";
 
 export function Home() {
-    const [groups, setGroups] = useState(['Costas', 'Bíceps', 'Tríceps', 'Ombro']);
-    const [exercises, setExercises] = useState(['Puxada frontal', 'Remada curvada ', 'Remada baixa', 'Remada alta']);
-    const [groupSelected, setGroupSelected] = useState('Costas');
+    const [isLoading, setIsLoading] = useState(true);
+    const [groups, setGroups] = useState<string[]>([]);
+    const [exercises, setExercises] = useState<ExerciseDTO[]>([]);
+    const [groupSelected, setGroupSelected] = useState('antebraço');
 
     const navigation = useNavigation<AppNavigatorRoutesProps>();
 
-    function handleOpenExercisesDetails() {
-        navigation.navigate('exercise')
+    function handleOpenExercisesDetails(exerciseId: string) {
+        navigation.navigate('exercise', {exerciseId});
     }
+
+    async function fetchGroups() {
+        try {
+            const response = await api.get('/groups');
+            setGroups(response.data);
+        } catch (error) {
+            const isAppError = error instanceof AppError;
+            const title = isAppError ? error.message : 'Não foi pissível carregar os grupos musculares.';
+            Alert.alert(title);
+        }
+    }
+
+    async function fetchExercisesByGroup() {
+        try {
+            setIsLoading(true);
+
+            const response = await api.get(`/exercises/bygroup/${groupSelected}`);
+            setExercises(response.data);
+        } catch (error) {
+            const isAppError = error instanceof AppError;
+            const title = isAppError ? error.message : 'Não foi pissível carregar os exercícios.';
+            Alert.alert(title);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchGroups();
+    }, []);
+
+    useFocusEffect(useCallback(() => {
+        fetchExercisesByGroup();
+    }, [groupSelected]));
 
     return(
         <View className="flex-1 w-full">
@@ -36,24 +75,28 @@ export function Home() {
                 className="px-10 my-10 max-h-10 min-h-10"
             />
 
-            <View className="flex-1 px-8">
-                <View className="flex-row justify-between mb-5">
-                    <Text className="text-gray-200 text-md font-heading">Exercícios</Text>
-                    <Text className="text-gray-200 text-sm">{exercises.length}</Text>
-                </View>
+            {
+                isLoading ? <Loading /> :
+                <View className="flex-1 px-8">
+                    <View className="flex-row justify-between mb-5">
+                        <Text className="text-gray-200 text-md font-heading">Exercícios</Text>
+                        <Text className="text-gray-200 text-sm">{exercises.length}</Text>
+                    </View>
 
-                <FlatList 
-                    data={exercises}
-                    keyExtractor={item => item}
-                    renderItem={({ item }) => (
-                        <ExerciseCard 
-                            onPress={handleOpenExercisesDetails}
-                        />
-                    )}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 20}}
-                />
-            </View>
+                    <FlatList 
+                        data={exercises}
+                        keyExtractor={item => item.id}
+                        renderItem={({ item }) => (
+                            <ExerciseCard 
+                                onPress={() => handleOpenExercisesDetails(item.id)}
+                                data={item}
+                            />
+                        )}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{ paddingBottom: 20}}
+                    />
+                </View>
+            }
 
         </View>
     );
