@@ -6,6 +6,7 @@ import { Button } from "@components/Button";
 import { Input } from "@components/Input";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { UserPhoto } from "@components/UserPhoto";
+import defaultUserPhotoImg from '@assets/userPhotoDefault.png';
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
@@ -34,7 +35,6 @@ then: (schema) => schema
 export function Profile() {
     const [isUpdating, setIsUpdating] = useState(false);
     const [photoIsLoading, sePhotoIsLoading] = useState(false);
-    const [userPhoto, setUserPhoto] = useState('https://github.com/lucasgmaieski.png');
     const { user, updateUserProfile } = useAuth();
     const { control, handleSubmit, formState: { errors} } = useForm<FormDataProps>({
         defaultValues: {
@@ -61,10 +61,33 @@ export function Profile() {
             if(photoSelected.assets[0].uri) {
                 const photoInfo = await FileSystem.getInfoAsync(photoSelected.assets[0].uri, {size: true})
 
-                if(photoInfo.exists && (photoInfo.size / 1024 / 1024 ) > 2) {
+                if(photoInfo.exists && (photoInfo.size / 1024 / 1024 ) > 3) {
                     return Alert.alert("Essa imagem é muito grande. Escolha uma de até 5MB.");
                 }
-                setUserPhoto(photoSelected.assets[0].uri)
+
+                // setUserPhoto(photoSelected.assets[0].uri)
+                const fileExtension = photoSelected.assets[0].uri.split('.').pop();
+                const photoFile = {
+                    name: `${user.name.trim()}.${fileExtension}`.toLowerCase(),
+                    uri: photoSelected.assets[0].uri,
+                    type: `${photoSelected.assets[0].type}/${fileExtension}`
+                } as any
+
+                const userPhotoUploadForm = new FormData();
+                userPhotoUploadForm.append('avatar', photoFile);
+
+                const avatarUpdatedResponse =  await api.patch('/users/avatar', userPhotoUploadForm, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                const userUpdated = user;
+                userUpdated.avatar = avatarUpdatedResponse.data.avatar;
+                updateUserProfile(userUpdated);
+
+                Alert.alert('Foto atualizada!');
+
             }
         } catch (error) {
             console.log(error);
@@ -104,7 +127,10 @@ export function Profile() {
                         <View role="status" className="w-[110px] aspect-square animate-pulse bg-gray-400 rounded-full"></View>
                         :
                         <UserPhoto
-                            source={{ uri: userPhoto}}
+                            source={ 
+                                user.avatar 
+                                ? { uri: `${api.defaults.baseURL}/avatar/${user.avatar}`}
+                                : defaultUserPhotoImg}
                             alt="Foto do usuário"
                             size={110}
                         />

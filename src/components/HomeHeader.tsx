@@ -4,6 +4,7 @@ import { MaterialIcons } from "@expo/vector-icons"
 import { colors } from "@styles/theme";
 import { useAuth } from "@hooks/useAuth";
 import defaultUserPhotoImg from '@assets/userPhotoDefault.png';
+import { api } from "@services/api";
 
 export function HomeHeader() {
     const { user, signOut } = useAuth();
@@ -12,7 +13,10 @@ export function HomeHeader() {
         <View className="bg-gray-600 pt-16 pb-5 px-8 items-center flex-row">
             <UserPhoto 
                 size={64} 
-                source={ user.avatar ? { uri: user.avatar}: defaultUserPhotoImg}
+                source={ 
+                    user.avatar 
+                    ? { uri: `${api.defaults.baseURL}/avatar/${user.avatar}`}
+                    : defaultUserPhotoImg}
                 alt="Imagem do usuário"
             />
             <View className="ml-4 flex-1">
