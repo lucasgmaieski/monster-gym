@@ -5,7 +5,10 @@ import { Loading } from '@components/Loading';
 import { Routes } from '@routes/index';
 import { SignIn } from '@screens/SignIn';
 import { AuthContext, AuthContextProvider } from '@contexts/AuthContext';
+import { OneSignal } from 'react-native-onesignal'
 
+
+OneSignal.initialize("d003277e-a8f8-4a1d-9cd8-74b32038af6c")
 export default function App() {
     const [fontsLoaded] = useFonts({ Roboto_400Regular, Roboto_700Bold });
 
