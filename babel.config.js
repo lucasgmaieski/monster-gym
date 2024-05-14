@@ -18,6 +18,7 @@ module.exports = function(api) {
             '@storage': './src/storage',
             '@utils': './src/utils',
             '@services': './src/services',
+            '@notifications': './src/notifications',
             '@hooks': './src/hooks',
             '@contexts': './src/contexts',
             '@routes': './src/routes',

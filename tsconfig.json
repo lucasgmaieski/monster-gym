@@ -25,6 +25,9 @@
       "@services/*": [
         "./src/services/*"
       ],
+      "@notifications/*": [
+        "./src/notifications/*"
+      ],
       "@hooks/*": [
         "./src/hooks/*"
       ],
