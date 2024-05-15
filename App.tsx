@@ -6,6 +6,7 @@ import { Routes } from '@routes/index';
 import { SignIn } from '@screens/SignIn';
 import { AuthContext, AuthContextProvider } from '@contexts/AuthContext';
 import { OneSignal } from 'react-native-onesignal'
+import { tagUserEmailCreate } from '@notifications/notificationsTags';
 
 
 OneSignal.initialize("d003277e-a8f8-4a1d-9cd8-74b32038af6c")
@@ -13,6 +14,8 @@ OneSignal.Notifications.requestPermission(true)
 
 export default function App() {
     const [fontsLoaded] = useFonts({ Roboto_400Regular, Roboto_700Bold });
+
+    tagUserEmailCreate("lucasgrigol@gmail.com")
 
     return (
         
