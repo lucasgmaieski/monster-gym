@@ -5,8 +5,9 @@ import { Loading } from '@components/Loading';
 import { Routes } from '@routes/index';
 import { SignIn } from '@screens/SignIn';
 import { AuthContext, AuthContextProvider } from '@contexts/AuthContext';
-import { OneSignal } from 'react-native-onesignal'
+import { NotificationClickEvent, OneSignal } from 'react-native-onesignal'
 import { tagUserEmailCreate } from '@notifications/notificationsTags';
+import { useEffect } from 'react';
 
 
 OneSignal.initialize("d003277e-a8f8-4a1d-9cd8-74b32038af6c")
@@ -17,6 +18,15 @@ export default function App() {
 
     tagUserEmailCreate("lucasgrigol@gmail.com")
 
+    useEffect(() => {
+        const handleNotificationClick = (event: NotificationClickEvent): void => {
+            console.log("Notificação aberta")
+        }
+        OneSignal.Notifications.addEventListener("click", handleNotificationClick);
+
+        return () => 
+            OneSignal.Notifications.removeEventListener("click", handleNotificationClick)
+    }, [])
     return (
         
         <View className="flex-1 bg-black justify-center items-center">
