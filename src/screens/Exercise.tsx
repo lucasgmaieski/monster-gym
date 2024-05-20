@@ -12,6 +12,8 @@ import { AppError } from "@utils/AppError";
 import { useEffect, useState } from "react";
 import { ExerciseDTO } from "@dtos/ExerciseDTO";
 import { Loading } from "@components/Loading";
+import { tagNumTreinosUpdate } from "@notifications/notificationsTags";
+import { countItemsInSameWeek } from "@utils/notificationshelpers";
 
 type RouteParamsProps = {
     exerciseId : string;
@@ -50,7 +52,9 @@ export function Exercise() {
             setSendingRegister(true);
 
             await api.post('/history', {exercise_id: exerciseId});
+            const response = await api.get('/history');
             Alert.alert('Parabéns! Exercício registrado no seu histórico.');
+            tagNumTreinosUpdate(countItemsInSameWeek(response.data).toString())
             navigation.navigate('history');
         } catch (error) {
             const isAppError = error instanceof AppError;

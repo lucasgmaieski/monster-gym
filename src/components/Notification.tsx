@@ -5,6 +5,7 @@ import { colors } from '@styles/theme';
 import { OSNotification } from 'react-native-onesignal';
 import { useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '@routes/app.routes';
+import * as Linking from 'expo-linking';
 
 type Props = {
   data: OSNotification;
@@ -14,6 +15,10 @@ type additionalDataProps = {
     route?: string;
     excercise_id?: string;
 }
+type CustomOSNotification = {
+    custom: any
+    u: string
+  }
 export function Notification({ data, onClose }: Props) {
     const { navigate } = useNavigation<AppNavigatorRoutesProps>();
     function handleOnPress() {
@@ -25,8 +30,14 @@ export function Notification({ data, onClose }: Props) {
                 onClose();
             }
         } else {
-            console.log("clickou na notificação mas não tem informações adicionais")
-            onClose();
+            const { custom }: CustomOSNotification = JSON.parse(
+                data.rawPayload.toString(),
+              )
+              const { u: uri }: CustomOSNotification = JSON.parse(custom.toString())
+            if(uri) {
+                Linking.openURL(uri);
+                onClose();
+            }
         }
     }
 
@@ -36,9 +47,14 @@ export function Notification({ data, onClose }: Props) {
                 <View className='mr-2'>
                     <Ionicons name="notifications-outline" className='text-black' size={25}/>
                 </View>
-                <Text className="text-md text-black flex-1">
-                    {data.title}
-                </Text>
+                <View className='flex-1'>
+                    <Text className="text-md text-black">
+                        {data.title}
+                    </Text>
+                    <Text className="text-md text-black">
+                        {data.body}
+                    </Text>
+                </View>
                 <TouchableOpacity onPress={onClose} className=''>
                     <Ionicons name="close-sharp" className='text-black' size={25}/>
                 </TouchableOpacity>

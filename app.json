@@ -2,6 +2,7 @@
   "expo": {
     "name": "monster-gym",
     "slug": "monster-gym",
+    "scheme": "monster-gym",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

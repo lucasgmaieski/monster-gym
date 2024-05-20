@@ -9,6 +9,20 @@ import { useEffect, useState } from "react";
 import { NotificationWillDisplayEvent, OSNotification, OneSignal } from "react-native-onesignal";
 import { Notification } from "@components/Notification";
 
+const linking = {
+    prefixes: ["monster-gym://", "com.anonymous.monstergym://"],
+    config: {
+        screens: {
+            exercise: {
+                path: "/exercise/:exerciseId",
+                parse: {
+                    exerciseId: (exerciseId: string) => exerciseId,
+                },
+            },
+        },
+    },
+}
+
 export function Routes() {
     const [notification, setNotification] = useState<OSNotification>()
     const { user, isLoadingUserStorageData } = useAuth();
@@ -37,7 +51,7 @@ export function Routes() {
     }
     return (
         <View className="flex-1 w-full bg-gray-700">
-            <NavigationContainer theme={theme}>
+            <NavigationContainer theme={theme} linking={linking}>
                 {user.id ? 
                 <>
                     <AppRoutes /> 
